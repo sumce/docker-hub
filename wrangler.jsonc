@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "docker-hub-proxy",
+  "main": "worker/index.ts",
+  "compatibility_date": "2024-12-05",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    // 上游 Registry，默认代理 Docker Hub。
+    // 也可改成其它 registry，例如 ghcr.io / quay.io / registry.k8s.io
+    "UPSTREAM": "https://registry-1.docker.io",
+    // 上游鉴权服务地址（Docker Hub 的令牌服务）
+    "AUTH_URL": "https://auth.docker.io/token"
+  }
+}

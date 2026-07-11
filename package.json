@@ -1,15 +1,27 @@
 {
-  "name": "docker-registry-proxy",
+  "name": "docker-hub-proxy",
+  "private": true,
   "version": "1.0.0",
-  "description": "Cloudflare Worker — Docker Registry Proxy + React Landing Page",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "build:ui": "cd ui && npm run build",
-    "deploy": "npm run build:ui && wrangler deploy src/index.js",
-    "tail": "wrangler tail"
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "start": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "wrangler": "^4.0.0"
+    "@cloudflare/workers-types": "^4.20241205.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.3",
+    "wrangler": "^3.95.0"
   }
 }

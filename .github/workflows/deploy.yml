@@ -3,7 +3,7 @@ name: Deploy to Cloudflare Workers
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # 也可以在 GitHub 页面手动触发
+  workflow_dispatch: # 也可以在 GitHub 页面手动触发
 
 jobs:
   deploy:
@@ -15,15 +15,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
 
       - name: Build React UI
-        run: |
-          cd ui
-          npm ci
-          npm run build
+        run: npm run build
 
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
-          command: deploy src/index.js
+          # wrangler-action 默认执行 `wrangler deploy`，读取 wrangler.jsonc

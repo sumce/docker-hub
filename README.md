@@ -1,154 +1,110 @@
-# 📦 Docker Registry Proxy
+# Docker Hub 镜像代理 · Cloudflare Worker
 
-基于 **Cloudflare Workers** 的 Docker 镜像拉取加速代理。
+用一个 Cloudflare Worker 同时完成两件事：
 
-> 替换 `docker pull` 中的 Registry 地址，即可享受边缘缓存加速，无需任何客户端安装。
-
----
-
-## 项目结构
+1. **Docker Hub 镜像加速**：按 Docker Registry v2 协议代理 `docker pull`，加速国内拉取。
+2. **React 落地页**：给人看的说明页面，自动展示你自己的加速域名和使用命令。
 
 ```
-docker-registry-proxy/
-├── src/
-│   ├── index.js      # 入口路由 — 请求分发
-│   ├── config.js     # 配置中心 — Registry 列表 / 缓存 TTL
-│   ├── proxy.js      # 代理核心 — 转发 / Token 认证 / 重定向
-│   ├── auth.js       # Docker Hub Bearer Token 获取
-│   ├── cache.js      # 缓存策略 — Cache API 读写
-│   ├── pages.js      # 展示页面 — 首页 HTML / 健康检查
-│   └── utils.js      # 工具函数
-├── package.json
-├── wrangler.toml     # Cloudflare Workers 配置
-└── README.md
+浏览器访问  /            ->  React 落地页（静态资源）
+docker 拉取  /v2/...     ->  Worker 代理到 registry-1.docker.io
 ```
 
-**设计原则**：每个文件职责单一，方便阅读理解也方便协作 PR。
+## 目录结构
 
----
-
-## 快速部署
-
-### 1. 安装 wrangler
-
-```bash
-npm install -g wrangler
-wrangler login
 ```
-
-### 2. 修改配置
-
-编辑 `wrangler.toml`，取消注释并填入你的域名：
-
-```toml
-[route]
-pattern = "docker.你的域名.com/*"
-zone_id = "你的 Zone ID"
+docker-hub/
+├── worker/
+│   ├── index.ts        # Worker 代理核心逻辑（Registry v2）
+│   └── tsconfig.json
+├── src/                # React 前端落地页
+│   ├── main.tsx
+│   ├── App.tsx
+│   └── index.css
+├── public/favicon.svg
+├── index.html
+├── wrangler.jsonc      # Worker 配置（入口 + 静态资源绑定 + 环境变量）
+├── vite.config.ts
+├── tsconfig.json
+└── package.json
 ```
-
-### 3. 部署
-
-```bash
-npm run deploy
-# 或
-wrangler deploy src/index.js
-```
-
-### 4. 测试
-
-```bash
-# 访问首页
-curl https://docker.你的域名.com/
-
-# 拉取镜像
-docker pull docker.你的域名.com/library/nginx:latest
-```
-
----
-
-## 使用方法
-
-### 按需使用 — 替换域名
-
-```bash
-# Docker Hub（默认）
-docker pull docker.你的域名.com/library/nginx:latest
-
-# GitHub Container Registry
-docker pull docker.你的域名.com/owner/repo:tag?registry=ghcr.io
-
-# Quay
-docker pull docker.你的域名.com/prometheus/prometheus:latest?registry=quay.io
-```
-
-### 永久配置 — Docker Daemon
-
-```json
-{
-  "registry-mirrors": ["https://docker.你的域名.com"]
-}
-```
-
-```bash
-systemctl restart docker
-```
-
-之后 `docker pull nginx` 自动走代理。
-
----
-
-## 支持的 Registry
-
-| Registry | 标识名 | 用途 |
-|---|---|---|
-| Docker Hub | `docker.io` (默认) | 公共镜像市场 |
-| GitHub Container Registry | `ghcr.io` | GitHub 发布镜像 |
-| Quay | `quay.io` | CoreOS / Prometheus 等 |
-| Google Container Registry | `gcr.io` | Google 服务镜像 |
-| Kubernetes GCR | `k8s.gcr.io` | K8s 组件镜像 |
-| GitLab Registry | `registry.gitlab.com` | GitLab CI 镜像 |
-
-更多 Registry 可在 `src/config.js` 的 `REGISTRIES` 中扩展。
-
----
-
-## 技术要点
-
-| 特性 | 实现 |
-|---|---|
-| **Token 认证** | 自动处理 Docker Hub 401 → Bearer Token 流程 |
-| **缓存加速** | Blob 缓存 30 天 / Manifest 按摘要缓存 1 天 / 按标签缓存 5 分钟 |
-| **重定向跟随** | Blob 的 302 到 S3/CDN 自动跟随 |
-| **CORS** | 全开 `access-control-allow-origin: *` |
-| **私有镜像** | 透传 `Authorization` 头，支持私有仓库 |
-| **安全** | `..` 过滤防止路径穿越 |
-
----
 
 ## 本地开发
 
 ```bash
-# 安装依赖
 npm install
 
-# 本地启动（需 Docker）
-wrangler dev src/index.js
+# 仅调试前端页面（热更新）
+npm run dev
 
-# 查看日志
-npm run tail
+# 同时调试 Worker + 前端（先构建再用 wrangler 本地运行）
+npm run start
 ```
 
----
+## 部署到 Cloudflare
 
-## 从 GitHub 同步到 Workers
+```bash
+# 首次需登录
+npx wrangler login
 
-本项目支持两种更新方式：
+# 构建前端 + 部署 Worker
+npm run deploy
+```
 
-1. **wrangler deploy**（推荐）：本地 push 后执行部署
-2. **Cloudflare Dashboard 直连 GitHub**：在 Workers Dashboard 中关联本仓库，自动部署
+部署后会得到一个 `https://docker-hub-proxy.<你的子域>.workers.dev` 地址，
+或在 Cloudflare 后台为该 Worker 绑定自定义域名（推荐，`workers.dev` 域名在部分网络下可能不通）。
 
----
+## 怎么用
 
-## License
+假设你的加速域名是 `hub.example.com`。
 
-MIT
+### 方式一：配置为镜像加速器（推荐）
+
+编辑 `/etc/docker/daemon.json`（Windows/Mac 在 Docker Desktop → Settings → Docker Engine）：
+
+```json
+{
+  "registry-mirrors": ["https://hub.example.com"]
+}
+```
+
+重启 Docker 后，`docker pull nginx` 会自动走加速。
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+```
+
+### 方式二：直接加前缀拉取
+
+```bash
+docker pull hub.example.com/library/nginx:latest
+docker tag  hub.example.com/library/nginx:latest nginx:latest
+```
+
+> 官方镜像（nginx、redis 等）需带 `library/` 前缀，代理会自动补全并 301 重定向。
+
+## 换成其它 Registry
+
+在 `wrangler.jsonc` 的 `vars` 里改上游即可（例如 GHCR、Quay、K8s）：
+
+```jsonc
+"vars": {
+  "UPSTREAM": "https://ghcr.io",
+  "AUTH_URL": "https://ghcr.io/token"
+}
+```
+
+## 工作原理
+
+Docker 拉取镜像走的是「令牌鉴权」流程，代理的关键就是把鉴权地址改写回自己：
+
+1. 客户端访问 `/v2/`，上游返回 `401 + Www-Authenticate`，指明去哪换 token。
+2. Worker 把该头改写成指向本站 `/v2/auth`，让客户端回来找我们要 token。
+3. 客户端带 `scope` 请求 `/v2/auth`，Worker 代它去上游真正的鉴权服务换 token 返回。
+4. 客户端带 token 请求 manifests / blobs，Worker 透明转发到上游。
+
+## 说明
+
+- 仅代理公开镜像，请遵守 Docker Hub 使用条款与速率限制。
+- Worker 免费额度为每天 10 万次请求，个人使用通常足够。
