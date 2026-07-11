@@ -7,3 +7,7 @@ dist
 *.log
 .DS_Store
 next-env.d.ts
+
+# 本地参考素材，不纳入仓库
+/landing-ui.html
+/unsiao_b.svg
