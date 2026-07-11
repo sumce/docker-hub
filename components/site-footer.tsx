@@ -33,15 +33,15 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-5 py-14">
         <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/logo/unsiao_b.svg"
-                alt="logo"
-                className="h-5 w-5 [filter:invert(1)]"
+                alt="UNSIAO"
+                className="h-7 w-auto [filter:invert(1)]"
               />
-              <span className="text-sm font-semibold tracking-tight">
-                HubProxy
+              <span className="text-base font-semibold tracking-tight">
+                UNSIAO™
               </span>
             </div>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">

@@ -6,18 +6,15 @@ export function SiteNav() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/70 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
-        <a href="#" className="flex items-center gap-2">
+        <a href="#" className="flex items-center gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo/unsiao_b.svg"
-            alt="logo"
-            className="h-5 w-5 [filter:invert(1)]"
+            alt="UNSIAO"
+            className="h-8 w-auto [filter:invert(1)]"
           />
-          <span className="text-sm font-semibold tracking-tight">
-            HubProxy
-          </span>
-          <span className="ml-1 rounded-full border border-border/70 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-            Registry
+          <span className="text-lg font-semibold tracking-tight">
+            UNSIAO™
           </span>
         </a>
 
