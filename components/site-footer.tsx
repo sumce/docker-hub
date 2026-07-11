@@ -74,7 +74,17 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border/60 pt-6 text-sm text-muted-foreground sm:flex-row">
-          <p>仅代理公开镜像，请遵守 Docker Hub 使用条款与速率限制。</p>
+          <div className="flex flex-col items-center gap-1.5 sm:items-start">
+            <p>仅代理公开镜像，请遵守 Docker Hub 使用条款与速率限制。</p>
+            <a
+              href="https://beian.miit.gov.cn/"
+              target="_blank"
+              rel="noreferrer"
+              className="transition-colors hover:text-foreground"
+            >
+              豫ICP备2024055216号-2
+            </a>
+          </div>
           <a
             href="https://github.com/sumce/docker-hub"
             target="_blank"
