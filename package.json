@@ -1,0 +1,15 @@
+{
+  "name": "docker-registry-proxy",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker — Docker Registry Proxy + React Landing Page",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build:ui": "cd ui && npm run build",
+    "deploy": "npm run build:ui && wrangler deploy src/index.js",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

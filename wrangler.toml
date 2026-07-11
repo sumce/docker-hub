@@ -1,0 +1,13 @@
+name = "docker-registry-proxy"
+main = "src/index.js"
+compatibility_date = "2025-04-01"
+
+# 自定义域名（部署时取消注释）
+# [route]
+# pattern = "docker.你的域名.com/*"
+# zone_id = "你的 Zone ID"
+
+# ── 静态资源 ──────────────────────────────────────
+# React 构建产物目录，访问 / 时自动返回 index.html
+# Worker 只处理 /v2/* 和 /health 等 API 路由
+assets = { directory = "ui/dist" }
