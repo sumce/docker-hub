@@ -3,10 +3,12 @@
 用一个 Cloudflare Worker 同时完成两件事：
 
 1. **Docker Hub 镜像加速**：按 Docker Registry v2 协议代理 `docker pull`，加速国内拉取。
-2. **React 落地页**：给人看的说明页面，自动展示你自己的加速域名和使用命令。
+2. **Next.js 落地页**：用 Next.js + Tailwind + shadcn/ui 做的说明页面，自动展示你自己的加速域名和使用命令。
+
+前端以 Next.js **静态导出**（`output: 'export'`）打包到 `out/`，由 Worker 的静态资源托管，Worker 专注处理 `/v2/` 代理。
 
 ```
-浏览器访问  /            ->  React 落地页（静态资源）
+浏览器访问  /            ->  Next.js 落地页（静态资源 out/）
 docker 拉取  /v2/...     ->  Worker 代理到 registry-1.docker.io
 ```
 
@@ -17,14 +19,19 @@ docker-hub/
 ├── worker/
 │   ├── index.ts        # Worker 代理核心逻辑（Registry v2）
 │   └── tsconfig.json
-├── src/                # React 前端落地页
-│   ├── main.tsx
-│   ├── App.tsx
-│   └── index.css
+├── app/                # Next.js App Router 前端落地页
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── globals.css
+├── components/
+│   ├── ui/             # shadcn/ui 组件 (button/card/badge/tabs)
+│   └── code-block.tsx  # 可复制代码块
+├── lib/utils.ts        # cn() 工具
 ├── public/favicon.svg
-├── index.html
-├── wrangler.jsonc      # Worker 配置（入口 + 静态资源绑定 + 环境变量）
-├── vite.config.ts
+├── next.config.mjs     # 静态导出配置
+├── tailwind.config.ts
+├── components.json     # shadcn 配置
+├── wrangler.jsonc      # Worker 配置（入口 + 静态资源绑定 out/ + 环境变量）
 ├── tsconfig.json
 └── package.json
 ```
@@ -34,10 +41,10 @@ docker-hub/
 ```bash
 npm install
 
-# 仅调试前端页面（热更新）
+# 调试前端页面（Next.js 热更新，http://localhost:3000）
 npm run dev
 
-# 同时调试 Worker + 前端（先构建再用 wrangler 本地运行）
+# 同时调试 Worker + 前端（先静态导出再用 wrangler 本地运行）
 npm run start
 ```
 
